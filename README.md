@@ -12,6 +12,15 @@ debootstraps a Debian/Ubuntu root filesystem, installs and configures the
 packages the spec asks for, squashes it, and wraps it in a GRUB rescue image.
 No LLM key? The keyword planner produces a spec offline, so the pipeline always runs.
 
+## Web app
+
+<https://puzzleboxsoftworks.github.io/ai-os-builder/> — type a prompt, get a validated
+spec in the browser (offline planner, or your own OpenAI-compatible key, which never
+leaves your browser), then either download the spec for the CLI or paste it into the
+**Build ISO** workflow, which builds the image in GitHub Actions and uploads it as an
+artifact. Pages can't run `debootstrap`/`chroot`, so the actual build happens in CI or
+on your machine.
+
 ## Install
 
 ```bash
