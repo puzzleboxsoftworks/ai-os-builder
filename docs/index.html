@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ai-os-builder — describe an OS, get a bootable ISO</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='14' font-size='14'>💿</text></svg>">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>ai&#8209;os&#8209;builder</h1>
+  <p>Describe an operating system. Get a validated build spec, then a real bootable Linux ISO.</p>
+</header>
+
+<main>
+  <section class="card">
+    <label for="prompt">1. Describe your OS</label>
+    <textarea id="prompt" rows="3" placeholder="a headless rescue and networking toolkit with ssh"></textarea>
+    <div class="chips" id="examples"></div>
+    <div class="row">
+      <button id="plan" class="primary">Generate spec</button>
+      <span id="planner-note" class="note">offline keyword planner — add a key below for an LLM</span>
+    </div>
+    <details>
+      <summary>LLM settings (optional)</summary>
+      <p class="note">Any OpenAI-compatible endpoint. The key stays in this browser's localStorage and is sent
+        only to the endpoint you enter — never to GitHub Pages or anywhere else.</p>
+      <div class="grid">
+        <label>API key<input id="api-key" type="password" placeholder="sk-..." autocomplete="off"></label>
+        <label>Base URL<input id="base-url" value="https://api.openai.com/v1"></label>
+        <label>Model<input id="model" value="gpt-4o-mini"></label>
+      </div>
+    </details>
+  </section>
+
+  <section class="card">
+    <label for="spec">2. Review and edit the spec</label>
+    <textarea id="spec" rows="22" spellcheck="false"></textarea>
+    <div id="validation" class="validation"></div>
+    <div class="row">
+      <button id="download">Download spec.json</button>
+      <button id="copy-spec">Copy spec</button>
+      <span id="estimate" class="note"></span>
+    </div>
+  </section>
+
+  <section class="card">
+    <label>3. Build the ISO</label>
+    <p class="note">The build needs root, <code>debootstrap</code> and a chroot, so it cannot run in a browser.
+      Pick one:</p>
+
+    <h3>In GitHub Actions (no local setup)</h3>
+    <ol>
+      <li>Copy the spec above.</li>
+      <li>Open the <a id="dispatch-link" href="#" target="_blank" rel="noopener">Build ISO workflow</a>,
+        click <em>Run workflow</em>, paste the spec into the <code>spec</code> input.</li>
+      <li>Download the ISO from the run's artifacts when it finishes (~10 min).</li>
+    </ol>
+
+    <h3>Locally</h3>
+    <pre><code id="cli-command"></code></pre>
+    <button id="copy-cli">Copy commands</button>
+  </section>
+
+  <section class="card">
+    <label>What you get</label>
+    <ul class="facts">
+      <li>Hybrid BIOS + UEFI ISO: xz-squashfs root, <code>live-boot</code> initramfs, GRUB menu with a safe-graphics entry.</li>
+      <li>Auto-login on tty1 and serial <code>ttyS0</code>, DHCP through <code>systemd-networkd</code>, your branding in <code>/etc/os-release</code>.</li>
+      <li>A measured headless Debian bookworm build: 223 MiB, ~2 min with a warm bootstrap cache.</li>
+      <li>Write it with <code>dd</code>, or boot it straight in QEMU: <code>aios run out.iso</code>.</li>
+    </ul>
+  </section>
+</main>
+
+<footer>
+  <a href="https://github.com/puzzleboxsoftworks/ai-os-builder">source on GitHub</a>
+</footer>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
