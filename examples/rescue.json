@@ -1,0 +1,39 @@
+{
+  "accent_color": "#4c7fff",
+  "arch": "amd64",
+  "autologin": true,
+  "description": "a minimal headless debian rescue and networking toolkit",
+  "desktop": "none",
+  "disable_services": [],
+  "enable_services": [
+    "ssh"
+  ],
+  "files": {},
+  "hostname": "headless-debian-os",
+  "kernel_cmdline": "quiet",
+  "keyboard": "us",
+  "locale": "en_US.UTF-8",
+  "mirror": "https://deb.debian.org/debian",
+  "motd": "Headless Debian OS 1.0 \u2014 a minimal headless debian rescue and networking toolkit",
+  "name": "Headless Debian OS",
+  "packages": [
+    "openssh-server",
+    "nmap",
+    "tcpdump",
+    "netcat-openbsd",
+    "iproute2",
+    "gdisk",
+    "parted",
+    "testdisk",
+    "smartmontools",
+    "rsync"
+  ],
+  "password": "live",
+  "post_install": [],
+  "root_password": "root",
+  "slug": "headless-debian-os",
+  "suite": "bookworm",
+  "timezone": "UTC",
+  "username": "user",
+  "version": "1.0"
+}
