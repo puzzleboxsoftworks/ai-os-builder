@@ -1,4 +1,5 @@
 import { planOffline, planWithLLM, validate, estimateSize } from "./planner.js";
+import { dispatchBuild, watchRun, downloadArtifact } from "./dispatch.js";
 
 const REPO = "puzzleboxsoftworks/ai-os-builder";
 const EXAMPLES = [
@@ -14,9 +15,14 @@ const els = {
   prompt: $("prompt"), spec: $("spec"), plan: $("plan"), note: $("planner-note"),
   validation: $("validation"), estimate: $("estimate"), cli: $("cli-command"),
   apiKey: $("api-key"), baseUrl: $("base-url"), model: $("model"),
+  repo: $("repo"), token: $("token"), build: $("build"),
+  buildStatus: $("build-status"), runLink: $("run-link"), artifacts: $("artifacts"),
 };
 
-for (const [key, el] of [["aios_key", els.apiKey], ["aios_base", els.baseUrl], ["aios_model", els.model]]) {
+for (const [key, el] of [
+  ["aios_key", els.apiKey], ["aios_base", els.baseUrl], ["aios_model", els.model],
+  ["aios_repo", els.repo], ["aios_token", els.token],
+]) {
   const saved = localStorage.getItem(key);
   if (saved) el.value = saved;
   el.addEventListener("change", () => localStorage.setItem(key, el.value));
@@ -113,6 +119,75 @@ $("download").addEventListener("click", () => {
   link.click();
   URL.revokeObjectURL(link.href);
 });
+
+function buildStatus(text, kind = "") {
+  els.buildStatus.textContent = text;
+  els.buildStatus.className = "validation " + kind;
+}
+
+async function build() {
+  const spec = currentSpec();
+  if (!spec) return buildStatus("spec is not valid JSON", "bad");
+  const errors = validate(spec);
+  if (errors.length) return buildStatus("fix the spec first:\n" + errors.join("\n"), "bad");
+
+  const repo = els.repo.value.trim();
+  const token = els.token.value.trim();
+  if (!token) { els.token.focus(); return buildStatus("a GitHub token is required", "bad"); }
+
+  els.build.disabled = true;
+  els.artifacts.replaceChildren();
+  els.runLink.hidden = true;
+  try {
+    buildStatus("dispatching workflow…");
+    const run = await dispatchBuild({ repo, token, spec: JSON.stringify(spec) });
+    els.runLink.href = run.html_url;
+    els.runLink.hidden = false;
+
+    const started = Date.now();
+    const { run: finished, artifacts } = await watchRun({
+      repo, token, runId: run.id,
+      onUpdate: (current) => buildStatus(
+        `run #${current.run_number}: ${current.status}` +
+        ` (${Math.round((Date.now() - started) / 1000)}s)`,
+      ),
+    });
+
+    if (finished.conclusion !== "success") {
+      return buildStatus(`build ${finished.conclusion} — see the run log`, "bad");
+    }
+    buildStatus("build succeeded", "good");
+    for (const artifact of artifacts) {
+      const button = document.createElement("button");
+      button.textContent = `Download ${artifact.name} (${Math.round(artifact.size_in_bytes / 1048576)} MiB zip)`;
+      button.addEventListener("click", async () => {
+        button.disabled = true;
+        const label = button.textContent;
+        button.textContent = "Downloading…";
+        try {
+          const href = await downloadArtifact({ repo, token, artifactId: artifact.id });
+          const link = document.createElement("a");
+          link.href = href;
+          link.download = `${artifact.name}.zip`;
+          link.click();
+          URL.revokeObjectURL(href);
+        } catch (error) {
+          buildStatus(`download failed: ${error.message}`, "bad");
+        } finally {
+          button.textContent = label;
+          button.disabled = false;
+        }
+      });
+      els.artifacts.append(button);
+    }
+  } catch (error) {
+    buildStatus(error.message, "bad");
+  } finally {
+    els.build.disabled = false;
+  }
+}
+
+els.build.addEventListener("click", build);
 
 els.prompt.value = EXAMPLES[0];
 generate();

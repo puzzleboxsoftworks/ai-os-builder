@@ -48,15 +48,23 @@
   <section class="card">
     <label>3. Build the ISO</label>
     <p class="note">The build needs root, <code>debootstrap</code> and a chroot, so it cannot run in a browser.
-      Pick one:</p>
+      This runs it in GitHub Actions for you:</p>
 
-    <h3>In GitHub Actions (no local setup)</h3>
-    <ol>
-      <li>Copy the spec above.</li>
-      <li>Open the <a id="dispatch-link" href="#" target="_blank" rel="noopener">Build ISO workflow</a>,
-        click <em>Run workflow</em>, paste the spec into the <code>spec</code> input.</li>
-      <li>Download the ISO from the run's artifacts when it finishes (~10 min).</li>
-    </ol>
+    <div class="grid">
+      <label>Repository<input id="repo" value="puzzleboxsoftworks/ai-os-builder"></label>
+      <label>GitHub token (<code>actions: read+write</code>)
+        <input id="token" type="password" placeholder="github_pat_..." autocomplete="off"></label>
+    </div>
+    <p class="note">A fine-grained token for this repo with <em>Actions: read and write</em>. It is kept in this
+      browser's localStorage and sent only to api.github.com.</p>
+    <div class="row">
+      <button id="build" class="primary">Build ISO in Actions</button>
+      <a id="run-link" href="#" target="_blank" rel="noopener" hidden>view run</a>
+    </div>
+    <div id="build-status" class="validation"></div>
+    <div id="artifacts" class="row"></div>
+    <p class="note">Or run it by hand from the
+      <a id="dispatch-link" href="#" target="_blank" rel="noopener">workflow page</a>.</p>
 
     <h3>Locally</h3>
     <pre><code id="cli-command"></code></pre>
