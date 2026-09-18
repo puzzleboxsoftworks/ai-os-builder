@@ -16,10 +16,13 @@ No LLM key? The keyword planner produces a spec offline, so the pipeline always 
 
 <https://puzzleboxsoftworks.github.io/ai-os-builder/> — type a prompt, get a validated
 spec in the browser (offline planner, or your own OpenAI-compatible key, which never
-leaves your browser), then either download the spec for the CLI or paste it into the
-**Build ISO** workflow, which builds the image in GitHub Actions and uploads it as an
-artifact. Pages can't run `debootstrap`/`chroot`, so the actual build happens in CI or
-on your machine.
+leaves your browser), then hit **Build ISO in Actions**: the page dispatches the
+`build-iso` workflow with your spec, follows the run, and downloads the finished ISO
+artifact for you. That needs a fine-grained GitHub token for this repo with
+*Actions: read and write*, also kept only in your browser.
+
+Pages can't run `debootstrap`/`chroot`, so the build itself happens in CI (or locally
+with the CLI); you can also download the spec and run `aios build spec.json` yourself.
 
 ## Install
 
